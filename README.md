@@ -82,6 +82,8 @@ Dependencies: `pnpm`, `curl`, `awk`, `jq`, `python3`, `playwright` (auto-install
 
 Any experiment id starting with `m3-` runs in blind mode: `--add-dir cp_of_*` and `--add-dir grounding/` are stripped from the claude invocation, and the preamble explicitly forbids reading source. Used to test how much of the agent's output came from codebase access vs prompt alone.
 
+> ⚠️ **The existing `m3-*` runs may not have executed correctly.** Their outputs are suspect — the blind-mode contract may have leaked (path hints in preamble/skill text, descriptions in `meta.json`, or the agent reading paths it was meant to be blind to). Do not draw conclusions from current `m3-*` results until this is resolved: audit the recorded prompts and tool calls, confirm `--add-dir` stripping fired, and re-run any tainted experiments before treating their judgements as load-bearing.
+
 ## The UI (`bin/exp.sh ui`)
 
 `http://localhost:5050` — two tabs.

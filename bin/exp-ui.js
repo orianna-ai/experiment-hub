@@ -44,6 +44,11 @@ const readJudgement = dir => {
   if (!fs.existsSync(fp)) return '';
   try { return fs.readFileSync(fp, 'utf8'); } catch { return ''; }
 };
+const readMeta = dir => {
+  const fp = path.join(dir, 'meta.json');
+  if (!fs.existsSync(fp)) return {};
+  try { return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch { return {}; }
+};
 
 const servers = [];
 function startVite(cwd, port, label) {
@@ -74,11 +79,13 @@ function inventory() {
     const lifecycle = readLifecycle(dir);
     const judgement = readJudgement(dir);
     const labeled = judgement.trim().length > 0;
+    const meta = readMeta(dir);
     return {
       name, origin, port, lifecycle,
       state: labeled ? 'labeled' : lifecycle,
       hasJudgement: labeled,
       cost: readCost(dir),
+      description: meta.description || '',
     };
   }).filter(Boolean);
   return { origins, originPort, experiments };
@@ -133,11 +140,11 @@ function renderIndex() {
   // pass payload to JS for the judgement tab
   const judgementPayload = experiments
     .filter(e => e.lifecycle === 'finished' && !e.hasJudgement)
-    .map(e => ({ name: e.name, origin: e.origin, port: e.port, originPort: originPort[e.origin], cost: e.cost }));
+    .map(e => ({ name: e.name, origin: e.origin, port: e.port, originPort: originPort[e.origin], cost: e.cost, description: e.description }));
   // payload for the overall-tab side-panel: every experiment
   const allExpsPayload = experiments.map(e => ({
     name: e.name, origin: e.origin, port: e.port, originPort: originPort[e.origin],
-    state: e.state, lifecycle: e.lifecycle, cost: e.cost,
+    state: e.state, lifecycle: e.lifecycle, cost: e.cost, description: e.description,
   }));
 
   return `<!doctype html><html><head>
@@ -159,20 +166,42 @@ function renderIndex() {
   .panel.active{display:block}
 
   /* --- OVERALL TAB --- */
-  .origin-block{padding:22px 26px;border-bottom:1px solid var(--border)}
-  .origin-block h2{margin:0 0 6px;font-size:16px;font-weight:600;color:var(--ink)}
-  .origin-block .origin-meta{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
-  .origin-row{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
-  .origin-thumb{background:#101015;border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .12s,transform .12s}
-  .origin-thumb:hover{border-color:#2c2c34}
-  .origin-thumb:active{transform:translateY(1px)}
-  .origin-thumb .head{padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);background:#13131a;border-bottom:1px solid var(--border)}
-  .origin-thumb img{display:block;width:100%;height:auto;background:#fff}
-  .exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-  .exp-card{background:#101015;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
-  .exp-card .head{padding:8px 12px;display:flex;justify-content:space-between;gap:8px;align-items:center;background:#13131a;border-bottom:1px solid var(--border)}
+  .origin-block{padding:24px 28px;border-bottom:1px solid var(--border)}
+  .origin-block h2{margin:0 0 4px;font-size:16px;font-weight:600;color:var(--ink)}
+  .origin-block .origin-meta{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:18px}
+
+  /* compare strip: large side-by-side */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
+  .compare-side{background:#101015;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .compare-side .label{padding:10px 14px;background:#13131a;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .compare-side .label .name{color:var(--ink);text-transform:none;letter-spacing:0;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .compare-side.original .label .tag{color:#9aa0a6}
+  .compare-side.experiment .label .tag{color:var(--accent)}
+  .compare-side img{display:block;width:100%;background:#fff;aspect-ratio:1440/900;object-fit:cover;object-position:top;cursor:zoom-in}
+  .compare-side .ss-placeholder{aspect-ratio:1440/900;background:#08080b;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .compare-side .desc{padding:10px 14px;font-size:12px;color:var(--ink-2);line-height:1.5;border-top:1px solid var(--border-soft);background:#0f0f14}
+  .compare-side .meta-row{padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11px;font-variant-numeric:tabular-nums;border-top:1px solid var(--border-soft)}
+  .compare-side .meta-row .chip{padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:#13131a;color:var(--ink-2)}
+  .compare-side .meta-row .chip.usd{color:var(--accent);border-color:#234c39;background:#0f1a14}
+  .compare-side .meta-row .spacer{flex:1}
+  .compare-side .meta-row .open-btn{font:inherit;font-size:11px;color:var(--ink-2);background:transparent;border:1px solid var(--border);padding:4px 10px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+  .compare-side .meta-row .open-btn:hover{color:var(--ink);border-color:#2c2c34}
+  .compare-side .feedback{padding:10px 14px;font-size:12px;color:var(--ink);background:#15101a;border-top:1px solid #2a2238;white-space:pre-wrap;line-height:1.5}
+
+  /* horizontally scrollable experiment row */
+  .exp-grid{display:flex;gap:16px;overflow-x:auto;overflow-y:hidden;padding:4px 0 14px;scroll-snap-type:x mandatory;scrollbar-color:#2c2c34 transparent}
+  .exp-grid::-webkit-scrollbar{height:10px}
+  .exp-grid::-webkit-scrollbar-thumb{background:#2c2c34;border-radius:6px}
+  .exp-grid::-webkit-scrollbar-track{background:transparent}
+  .exp-card{flex:0 0 360px;scroll-snap-align:start;background:#101015;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:border-color .12s,transform .12s,box-shadow .12s}
+  .exp-card:hover{border-color:#2c2c34}
+  .exp-card:active{transform:translateY(1px)}
+  .exp-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .exp-card .head{padding:10px 12px;display:flex;justify-content:space-between;gap:8px;align-items:center;background:#13131a;border-bottom:1px solid var(--border)}
   .exp-card .head .name{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .exp-card .desc{padding:8px 12px;font-size:11px;color:var(--ink-2);background:#0f0f14;border-bottom:1px solid var(--border-soft);line-height:1.4}
   .exp-card img{display:block;width:100%;background:#fff;aspect-ratio:1440/900;object-fit:cover;object-position:top}
+  .exp-card .ss-placeholder{aspect-ratio:1440/900;background:#08080b;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
   .exp-card .feedback{padding:10px 12px;font-size:12px;color:var(--ink);background:#15101a;border-top:1px solid #2a2238;white-space:pre-wrap;line-height:1.5}
   .exp-card .cost{padding:8px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--ink-3);display:flex;gap:8px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
   .exp-card .cost b{color:var(--ink-2);font-weight:500}
@@ -212,6 +241,8 @@ function renderIndex() {
   .side-panel .sp-head .close:hover{color:var(--ink);background:#16161e}
   .side-panel .sp-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
   .sp-section-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+  .sp-description{font-size:13px;color:var(--ink-2);padding:10px 12px;background:#101015;border:1px solid var(--border);border-radius:8px;line-height:1.5}
+  .j-description{font-size:13px;color:var(--ink-2);padding:10px 12px;background:#101015;border:1px solid var(--border);border-radius:8px;line-height:1.5;margin-bottom:14px}
   .sp-iframe-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;height:540px;resize:vertical;min-height:300px;display:flex;flex-direction:column}
   .sp-iframe-wrap .label{padding:6px 12px;font-size:11px;color:var(--ink-2);background:#13131a;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
   .sp-iframe-wrap .label a{color:var(--ink-3);text-decoration:none}
@@ -317,36 +348,59 @@ function renderIndex() {
 </header>
 
 <section class="panel" id="panel-overall">
-${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : origExps.map(b => `
-  <div class="origin-block">
+${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : origExps.map(b => {
+  const counts = `${b.all.length} experiment(s) · ${b.all.filter(e => e.state === 'finished').length} finished · ${b.all.filter(e => e.state === 'labeled').length} labeled · ${b.all.filter(e => e.state === 'running').length} running · ${b.all.filter(e => e.state === 'not-started').length} pending · ${b.all.filter(e => e.state === 'failed').length} failed`;
+  return `
+  <div class="origin-block" data-origin="${b.origin}">
     <h2>${b.origin}</h2>
-    <div class="origin-meta">${b.all.length} experiment(s) · ${b.all.filter(e => e.state === 'finished').length} finished · ${b.all.filter(e => e.state === 'labeled').length} labeled · ${b.all.filter(e => e.state === 'running').length} running · ${b.all.filter(e => e.state === 'not-started').length} pending · ${b.all.filter(e => e.state === 'failed').length} failed</div>
-    <div class="origin-row">
-      <div class="origin-thumb" data-origin="${b.origin}" data-origin-port="${b.port}" title="open original">
-        <div class="head">original<span style="float:right;color:var(--ink-3)">click to open ↗</span></div>
-        <img src="/origin/${b.origin}/screenshot.png" alt="${b.origin}" loading="lazy">
+    <div class="origin-meta">${counts}</div>
+
+    <div class="compare">
+      <div class="compare-side original" data-origin-port="${b.port}">
+        <div class="label">
+          <span class="tag">Original</span>
+          <span class="name">${b.origin}</span>
+          <button class="open-btn" data-action="open-origin">Open ↗</button>
+        </div>
+        <img src="/origin/${b.origin}/screenshot.png" alt="${b.origin}" loading="lazy" data-action="open-origin">
       </div>
-      <div>
-        ${b.visible.length === 0 ? `<div class="empty-block">no finished experiments yet.</div>` : `<div class="exp-grid">
-          ${b.visible.map(e => {
-            const pending = e.state === 'running' || e.state === 'not-started';
-            const hasAfter = fs.existsSync(path.join(ROOT, 'experiment', e.name, 'screenshots', 'after.png'));
-            const placeholder = e.state === 'failed' ? 'failed — no output' : 'no screenshot';
-            return `
-          <div class="exp-card${pending ? ' compact' : ''}" data-name="${e.name}">
-            <div class="head">
-              <span class="name" title="${escapeHtml(e.name)}">${escapeHtml(e.name)}</span>
-              <span class="state-badge" data-state="${e.state}"><span class="dot"></span>${e.state}</span>
-            </div>
-            ${pending ? '' : (hasAfter ? `<img src="/screenshot/${e.name}/after.png" loading="lazy">` : `<div class="ss-placeholder">${placeholder}</div>`)}
-            ${e.hasJudgement ? `<div class="feedback">${escapeHtml(readJudgement(path.join(ROOT,'experiment',e.name)).trim())}</div>` : ''}
-            ${e.cost ? `<div class="cost"><span><b>${fmtDuration(e.cost.wall_ms)}</b></span><span><b>${e.cost.turns}t</b></span><span><b>${fmtTokens(e.cost.tokens.total)}</b></span><span><b>${fmtUsd(e.cost.cost_usd)}</b></span></div>` : ''}
-          </div>`;
-          }).join('')}
-        </div>`}
+      <div class="compare-side experiment" data-compare-slot="${b.origin}">
+        <div class="label">
+          <span class="tag">Experiment</span>
+          <span class="name compare-exp-name">— pick one below —</span>
+          <span class="state-badge compare-exp-state" data-state="not-started" style="display:none"><span class="dot"></span></span>
+        </div>
+        <div class="compare-exp-image-slot"><div class="ss-placeholder">select an experiment</div></div>
+        <div class="compare-exp-desc desc" style="display:none"></div>
+        <div class="compare-exp-feedback feedback" style="display:none"></div>
+        <div class="meta-row">
+          <span class="compare-exp-cost" style="display:contents"></span>
+          <span class="spacer"></span>
+          <button class="open-btn" data-action="open-exp" disabled>Open detail</button>
+        </div>
       </div>
     </div>
-  </div>`).join('')}
+
+    ${b.visible.length === 0 ? `<div class="empty-block">no experiments yet.</div>` : `<div class="exp-grid">
+      ${b.visible.map(e => {
+        const pending = e.state === 'running' || e.state === 'not-started';
+        const hasAfter = fs.existsSync(path.join(ROOT, 'experiment', e.name, 'screenshots', 'after.png'));
+        const placeholder = e.state === 'failed' ? 'failed — no output' : 'no screenshot';
+        return `
+      <div class="exp-card" data-name="${e.name}" data-origin="${e.origin}" data-has-after="${hasAfter ? '1' : '0'}">
+        <div class="head">
+          <span class="name" title="${escapeHtml(e.name)}">${escapeHtml(e.name)}</span>
+          <span class="state-badge" data-state="${e.state}"><span class="dot"></span>${e.state}</span>
+        </div>
+        ${e.description ? `<div class="desc">${escapeHtml(e.description)}</div>` : ''}
+        ${hasAfter ? `<img src="/screenshot/${e.name}/after.png" loading="lazy">` : `<div class="ss-placeholder">${placeholder}</div>`}
+        ${e.hasJudgement ? `<div class="feedback">${escapeHtml(readJudgement(path.join(ROOT,'experiment',e.name)).trim())}</div>` : ''}
+        ${e.cost ? `<div class="cost"><span><b>${fmtDuration(e.cost.wall_ms)}</b></span><span><b>${e.cost.turns}t</b></span><span><b>${fmtTokens(e.cost.tokens.total)}</b></span><span><b>${fmtUsd(e.cost.cost_usd)}</b></span></div>` : ''}
+      </div>`;
+      }).join('')}
+    </div>`}
+  </div>`;
+}).join('')}
 </section>
 
 <div class="panel-backdrop" id="sp-backdrop"></div>
@@ -384,6 +438,10 @@ ${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : ori
   marked.use({ gfm: true, breaks: false });
   const JUDGEMENT = ${JSON.stringify(judgementPayload)};
   const ALL_EXPS = ${JSON.stringify(allExpsPayload)};
+
+  const fmtAgo = ts => { const s=Math.round((Date.now()-ts)/1000); return s<60?s+'s ago':Math.round(s/60)+'m ago'; };
+  const fmtDur = ms => { const s=Math.round(ms/1000); const m=Math.floor(s/60); return m>0?m+'m '+(s%60)+'s':s+'s'; };
+  const fmtTk = n => n>=1e6?(n/1e6).toFixed(1).replace(/\\.0$/,'')+'M':n>=1e3?(n/1e3).toFixed(1).replace(/\\.0$/,'')+'k':String(n);
 
   /* --- tab routing --- */
   const tabs = document.querySelectorAll('nav.tabs a');
@@ -423,6 +481,7 @@ ${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : ori
       (c ? \`<span class="chip">\${fmtDur(c.wall_ms)}</span><span class="chip">\${c.turns} turns</span><span class="chip">\${fmtTk(c.tokens.total)} tok</span><span class="chip usd">\${(c.cost_usd<10?'$'+c.cost_usd.toFixed(2):'$'+c.cost_usd.toFixed(1))}</span>\` : '');
 
     spBody.innerHTML = \`
+      \${e.description ? \`<div class="sp-description">\${e.description.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))}</div>\` : ''}
       <div>
         <div class="sp-section-label" style="margin-bottom:6px">judgement</div>
         <div class="j-editor">
@@ -557,8 +616,73 @@ ${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : ori
     sp.classList.add('open'); spBackdrop.classList.add('open'); sp.setAttribute('aria-hidden','false');
   }
 
+  /* --- overall tab: compare-pane selection --- */
+  function selectExp(origin, name) {
+    const card = document.querySelector(\`.exp-card[data-name="\${name}"]\`);
+    const slot = document.querySelector(\`.compare-side[data-compare-slot="\${origin}"]\`);
+    if (!card || !slot) return;
+    document.querySelectorAll(\`.exp-card[data-origin="\${origin}"]\`).forEach(c => c.classList.toggle('selected', c === card));
+
+    const exp = ALL_EXPS.find(x => x.name === name);
+    if (!exp) return;
+    slot.querySelector('.compare-exp-name').textContent = name;
+    const badge = slot.querySelector('.compare-exp-state');
+    badge.setAttribute('data-state', exp.state);
+    badge.style.display = '';
+    badge.innerHTML = '<span class="dot"></span>' + exp.state;
+
+    const imgSlot = slot.querySelector('.compare-exp-image-slot');
+    const hasAfter = card.dataset.hasAfter === '1';
+    imgSlot.innerHTML = hasAfter
+      ? \`<img src="/screenshot/\${name}/after.png" alt="\${name}" data-action="open-exp">\`
+      : \`<div class="ss-placeholder">\${exp.state === 'failed' ? 'failed — no output' : 'no screenshot'}</div>\`;
+
+    const descEl = slot.querySelector('.compare-exp-desc');
+    if (exp.description) { descEl.textContent = exp.description; descEl.style.display = ''; }
+    else { descEl.style.display = 'none'; }
+
+    const feedbackEl = slot.querySelector('.compare-exp-feedback');
+    const cardFb = card.querySelector('.feedback');
+    if (cardFb) { feedbackEl.textContent = cardFb.textContent; feedbackEl.style.display = ''; }
+    else { feedbackEl.style.display = 'none'; }
+
+    const c = exp.cost;
+    const costEl = slot.querySelector('.compare-exp-cost');
+    costEl.innerHTML = c
+      ? \`<span class="chip">\${fmtDur(c.wall_ms)}</span><span class="chip">\${c.turns} turns</span><span class="chip">\${fmtTk(c.tokens.total)} tok</span><span class="chip usd">\${(c.cost_usd<10?'$'+c.cost_usd.toFixed(2):'$'+c.cost_usd.toFixed(1))}</span>\`
+      : '';
+    slot.querySelector('button[data-action="open-exp"]').disabled = false;
+    slot.dataset.selectedName = name;
+  }
+
   document.querySelectorAll('.exp-card[data-name]').forEach(card => {
-    card.addEventListener('click', () => openExp(card.dataset.name));
+    card.addEventListener('click', () => selectExp(card.dataset.origin, card.dataset.name));
+  });
+
+  /* default selection per origin: first card with an after.png, else first card */
+  document.querySelectorAll('.origin-block').forEach(block => {
+    const origin = block.dataset.origin;
+    const cards = block.querySelectorAll('.exp-card');
+    if (!cards.length) return;
+    const preferred = Array.from(cards).find(c => c.dataset.hasAfter === '1') || cards[0];
+    selectExp(origin, preferred.dataset.name);
+  });
+
+  /* compare-side action buttons (open-origin, open-exp) */
+  document.querySelectorAll('.compare-side').forEach(side => {
+    side.addEventListener('click', evt => {
+      const action = evt.target.closest('[data-action]')?.dataset.action;
+      if (!action) return;
+      evt.stopPropagation();
+      if (action === 'open-origin') {
+        const port = Number(side.dataset.originPort);
+        const origin = side.closest('.origin-block').dataset.origin;
+        openOrigin(origin, port);
+      } else if (action === 'open-exp') {
+        const name = side.dataset.selectedName;
+        if (name) openExp(name);
+      }
+    });
   });
 
   function openOrigin(name, port) {
@@ -582,14 +706,7 @@ ${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : ori
     sp.classList.add('open'); spBackdrop.classList.add('open'); sp.setAttribute('aria-hidden','false');
   }
 
-  document.querySelectorAll('.origin-thumb[data-origin]').forEach(el => {
-    el.addEventListener('click', () => openOrigin(el.dataset.origin, el.dataset.originPort));
-  });
-
   /* --- judgement workflow --- */
-  const fmtAgo = ts => { const s=Math.round((Date.now()-ts)/1000); return s<60?s+'s ago':Math.round(s/60)+'m ago'; };
-  const fmtDur = ms => { const s=Math.round(ms/1000); const m=Math.floor(s/60); return m>0?m+'m '+(s%60)+'s':s+'s'; };
-  const fmtTk = n => n>=1e6?(n/1e6).toFixed(1).replace(/\\.0$/,'')+'M':n>=1e3?(n/1e3).toFixed(1).replace(/\\.0$/,'')+'k':String(n);
 
   let selectedOrigin = null;
   let selectedExp = null;
@@ -630,6 +747,7 @@ ${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : ori
     const subChips = c
       ? '<span class="chip">' + fmtDur(c.wall_ms) + '</span><span class="chip">' + c.turns + ' turns</span><span class="chip">' + fmtTk(c.tokens.total) + ' tok</span><span class="chip usd">' + (c.cost_usd < 10 ? '$' + c.cost_usd.toFixed(2) : '$' + c.cost_usd.toFixed(1)) + '</span>'
       : '';
+    const escDesc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     main.innerHTML = \`
       <h2>\${name}</h2>
       <div class="sub">
@@ -637,6 +755,7 @@ ${origExps.length === 0 ? `<div class="empty-block">no origins yet.</div>` : ori
         <span class="chip">port: \${selectedExp.port}</span>
         \${subChips}
       </div>
+      \${selectedExp.description ? \`<div class="j-description">\${escDesc(selectedExp.description)}</div>\` : ''}
       <div class="j-editor">
         <div class="head"><span class="label">judgement</span><span class="status" id="j-status">empty</span></div>
         <textarea id="j-textarea" placeholder="How much did it achieve its goal? What was missed? Why was it missed?"></textarea>

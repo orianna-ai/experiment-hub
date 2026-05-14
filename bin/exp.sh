@@ -7,7 +7,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 EXPERIMENTS_MD="$ROOT/EXPERIMENTS.md"
 GROUNDINGS_REL="../../grounding/twenty"
-SCRATCH_PORT=5199
+SCRATCH_PORT="${SCRATCH_PORT:-5199}"
 VIEWPORT="${VIEWPORT:-1440,900}"
 
 die() { echo "error: $*" >&2; exit 1; }
