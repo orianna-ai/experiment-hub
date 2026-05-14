@@ -1,0 +1,12 @@
+{
+  "wall_ms": 303000,
+  "turns": 35,
+  "cost_usd": 2.14422475,
+  "tokens": {
+    "input": 50,
+    "cache_creation": 70505,
+    "cache_read": 2309937,
+    "output": 21934,
+    "total": 2402426
+  }
+}

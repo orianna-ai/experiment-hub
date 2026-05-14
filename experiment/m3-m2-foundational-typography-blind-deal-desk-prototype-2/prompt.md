@@ -1,0 +1,1 @@
+/goal Improve the typography of this prototype (http://localhost:5251/), which is a mock of a future feature built into twenty. Work only from what you can observe at the URL — do not read the prototype source or any reference codebase. Focus on scale, pairing, leading, measure, and weight contrast.

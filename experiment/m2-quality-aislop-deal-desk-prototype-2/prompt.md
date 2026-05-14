@@ -1,0 +1,1 @@
+/goal Remove AI-slop tells from this prototype (http://localhost:5219/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on centered-hero+3-cards, gradient overuse, and generic stock vibe. Ignore unrelated design issues.

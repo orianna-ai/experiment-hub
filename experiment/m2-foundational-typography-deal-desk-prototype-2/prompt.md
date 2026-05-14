@@ -1,0 +1,1 @@
+/goal Improve the typography of this prototype (http://localhost:5203/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on scale, pairing, leading, measure, and weight contrast. Ignore unrelated design issues.

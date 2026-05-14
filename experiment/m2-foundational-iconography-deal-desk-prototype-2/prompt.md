@@ -1,0 +1,1 @@
+/goal Improve the iconography of this prototype (http://localhost:5207/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on style, weight, and consistency. Ignore unrelated design issues.

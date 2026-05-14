@@ -1,0 +1,1 @@
+/goal Improve the spacing and rhythm of this prototype (http://localhost:5253/), which is a mock of a future feature built into twenty. Work only from what you can observe at the URL — do not read the prototype source or any reference codebase. Focus on the spacing scale, density, and vertical rhythm.

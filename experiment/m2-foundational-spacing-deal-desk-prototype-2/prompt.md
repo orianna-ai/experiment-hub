@@ -1,0 +1,1 @@
+/goal Improve the spacing and rhythm of this prototype (http://localhost:5205/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on the spacing scale, density, and vertical rhythm. Ignore unrelated design issues.

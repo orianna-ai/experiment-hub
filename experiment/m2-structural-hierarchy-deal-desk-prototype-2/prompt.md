@@ -1,0 +1,1 @@
+/goal Improve the information hierarchy of this prototype (http://localhost:5209/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on scannability and focal points. Ignore unrelated design issues.

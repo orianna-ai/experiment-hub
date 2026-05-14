@@ -1,0 +1,1 @@
+/goal Improve the tables and data density of this prototype (http://localhost:5214/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on zebra striping, sticky headers, and sort affordances. Ignore unrelated design issues.

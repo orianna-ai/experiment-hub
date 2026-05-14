@@ -1,0 +1,1 @@
+/goal Improve the grid and layout of this prototype (http://localhost:5226/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on columns, alignment, and max-widths. Ignore unrelated design issues.

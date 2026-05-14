@@ -1,0 +1,1 @@
+/goal Improve the forms of this prototype (http://localhost:5233/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on label position, validation, and affordances. Ignore unrelated design issues.

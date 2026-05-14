@@ -1,0 +1,1 @@
+/goal Improve the pixel polish of this prototype (http://localhost:5237/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on alignment, optical centering, and hairlines. Ignore unrelated design issues.

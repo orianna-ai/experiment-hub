@@ -1,0 +1,22 @@
+# Re-pulled / installed by bin/init.sh
+grounding/*
+node_modules/
+
+# Build artifacts (re-derivable)
+**/dist/
+**/.vite/
+**/tsconfig.tsbuildinfo
+
+# Experiment runtime artifacts (re-derivable, contains session ids)
+experiment/*/.run.json
+experiment/*/.run.err
+experiment/*/.serve.log
+experiment/*/.serve.pid
+
+# Origin baselines (re-derivable via `bin/exp.sh prep <origin>`)
+# Anywhere — including the copies under experiment/*/cp_of_*/ that `cp -R` drags in.
+**/.cached-before.png
+
+# Editor / OS junk
+.DS_Store
+*.log

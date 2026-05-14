@@ -1,0 +1,1 @@
+/goal Improve the color usage of this prototype (http://localhost:5224/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on palette, contrast, semantic roles, and dark mode. Ignore unrelated design issues.

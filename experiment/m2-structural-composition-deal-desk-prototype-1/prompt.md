@@ -1,0 +1,1 @@
+/goal Improve the composition and balance of this prototype (http://localhost:5230/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on asymmetry, whitespace, and tension. Ignore unrelated design issues.

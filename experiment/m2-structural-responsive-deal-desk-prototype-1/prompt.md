@@ -1,0 +1,1 @@
+/goal Improve the responsive behavior of this prototype (http://localhost:5231/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on breakpoints, reflow, and touch targets. Ignore unrelated design issues.

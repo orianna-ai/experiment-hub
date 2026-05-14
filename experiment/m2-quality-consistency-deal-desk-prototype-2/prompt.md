@@ -1,0 +1,1 @@
+/goal Improve the design-token and pattern consistency of this prototype (http://localhost:5218/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Focus on token adherence and repeated patterns. Ignore unrelated design issues.

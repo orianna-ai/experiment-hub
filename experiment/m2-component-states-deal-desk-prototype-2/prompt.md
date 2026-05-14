@@ -1,0 +1,1 @@
+/goal Improve the empty, loading, and error states of this prototype (http://localhost:5215/), which is a mock of a future feature built into twenty (live codebase is at ../../grounding/twenty for reference to use as a baseline to adhere to). Cover all three states across every data-driven view. Ignore unrelated design issues.
