@@ -1,0 +1,18 @@
+{
+  "wall_ms": 1427803,
+  "turns": 38,
+  "assistant_events": 146,
+  "refresh_count": 12,
+  "cost_usd": 41.262525,
+  "tokens": {
+    "input": 371,
+    "output": 107475,
+    "cache_creation": 333979,
+    "cache_read": 15451310,
+    "total": 15893135
+  },
+  "model": "claude-opus-4-7",
+  "pricing_basis": "Opus 4 list price (input $15, output $75, cache_write_1h $30, cache_read $1.50 per Mtok); all cache_creation here is ephemeral_1h",
+  "tool_use_histogram": "Bash=21,Edit=54,Read=17",
+  "source_jsonl": "/Users/milroc/.claude/projects/-Users-milroc-Developer-softlight-judge-experiment-m5-ai-detection-comparison-deal-desk-prototype-1/211d052c-ab0b-4e73-b763-01c9308fe408.jsonl"
+}

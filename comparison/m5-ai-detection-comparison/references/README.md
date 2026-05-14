@@ -1,18 +1,45 @@
 # Human-designed reference pool — `m5-ai-detection-comparison`
 
-Sixteen 1440×900 PNGs of real, human-designed CRM surfaces — flat app UI, no marketing framing. The harness samples one per run, randomly assigns the prototype's `after.png` and the chosen reference to `image-A.png` / `image-B.png`, records the ground truth in `comparison-key.json`, and grades the agent against the key.
+Five 1440×900 PNGs of real, human-designed CRM surfaces — flat full-screen app UI (sidebar + header chrome + substantial main content), no marketing framing. The harness samples one per run, randomly assigns the prototype's `after.png` and the chosen reference to `image-A.png` / `image-B.png`, records the ground truth in `comparison-key.json`, and grades the agent against the key.
+
+## The active 5
+
+| filename | surface |
+|---|---|
+| `ref-01.png` | companies table (sidebar + clean table — baseline view) |
+| `ref-02.png` | companies table with record side-panel open (3-column dense view) |
+| `ref-07.png` | opportunities kanban pipeline (matches deal-desk prototypes most directly) |
+| `ref-10.png` | record with email inbox tab (sidebar + record fields + emails list) |
+| `ref-17.png` | record with activity timeline tab (sidebar + fields + timeline) |
+
+Selection criterion: each must look like a full app screenshot — visible left nav sidebar, top header chrome, real seed data in the main content area, no cursor annotations, no isolated-popover or modal-only framing, no docs-style side-by-side comparisons.
 
 ## Why these images
 
-The prototypes are mocks of *features built into twenty*. The most honest "what a human designer at twenty would produce" baseline is *twenty itself* — every reference here is sourced from `grounding/twenty/packages/twenty-docs/images/user-guide/`, the in-product documentation captures. These are raw app UI: full window chrome, sidebar + main content, no drop shadows or hero framing.
+The prototypes are mocks of *features built into twenty*. The most honest "what a human designer at twenty would produce" baseline is *twenty itself*. The active five come from two sources, both real flat app UI:
 
-Earlier we tried `grounding/twenty/packages/twenty-docs/images/releases/`, but those are marketing-formatted release-notes screenshots — cropped, padded, often shown floating on solid backgrounds. They mismatch the prototype `after.png` (a flat playwright capture of a dev-server window), so the judge could distinguish on framing alone. The `user-guide/` shots match the prototype framing.
+- **`ref-01`, `ref-02`, `ref-07`, `ref-10`** — sourced from `grounding/twenty/packages/twenty-docs/images/user-guide/`, the in-product documentation captures.
+- **`ref-17`** — sourced from a PR review screenshot on github.com/twentyhq/twenty (PR #19800). PR screenshots are casual development captures — full window, real seed data — not curated for marketing.
+
+Earlier we tried `grounding/twenty/packages/twenty-docs/images/releases/`, but those are marketing-formatted release-notes screenshots — cropped, padded, often shown floating on solid backgrounds. They mismatch the prototype `after.png` (a flat playwright capture of a dev-server window), so the judge could distinguish on framing alone. Both sources used here match the prototype framing.
 
 The m5 prompt explicitly forbids the judge from reverse-image-searching or identifying artifacts, so using real twenty surfaces is permitted — the judge must evaluate on craft signals alone.
 
+## `extra/` — held back from sampling
+
+`extra/` contains 20 additional references that were collected during scouting but did not meet the full-screen-UI bar (close-up fragments, missing-sidebar modals, cursor-annotated docs shots, etc.). They're preserved in the codebase for future experiments or to swap into the active pool, but the harness's `ref-*.png` glob in this directory does not see them. Each has the same TSV format in `extra/_provenance.tsv`.
+
 ## Provenance
 
-`_provenance.tsv` maps each `ref-NN.png` → source path inside `grounding/` → one-line description of the surface. Renaming to `ref-NN.png` is deliberate: filenames are visible to anything that touches the file system and would otherwise be a glaring identification leak.
+`_provenance.tsv` has one row per reference, three tab-separated columns:
+
+| Column | Meaning |
+|---|---|
+| `ref-NN.png` | the local filename |
+| source | either a path inside `grounding/twenty/...` (for user-guide refs) or a `https://github.com/twentyhq/twenty/pull/N` link (for PR-screenshot refs) |
+| description | one line, what the surface shows |
+
+Renaming to `ref-NN.png` is deliberate: filenames are visible to anything that touches the file system and would otherwise be a glaring identification leak.
 
 ## Why commit them (not gitignore)
 
@@ -20,21 +47,27 @@ Same logic as `experiment/*/cp_of_*`: each judgement is only interpretable if th
 
 ## Adding or regenerating a reference
 
-Each ref is `cp` from the source listed in `_provenance.tsv` then `sips -z 900 1440 --cropToHeightWidth 900 1440` to match `screenshots/after.png` exactly. To add one:
+Each ref is brought to 1440×900 with `sips -z 900 1440 --cropToHeightWidth 900 1440`. Source can be either a local grounding path or a github.com/user-attachments URL pulled from a twentyhq/twenty PR.
 
 ```bash
-# add a row to _provenance.tsv, then:
-cp grounding/twenty/.../source.png comparison/m5-ai-detection-comparison/references/ref-17.png
+# From grounding/:
+cp grounding/twenty/.../source.png comparison/m5-ai-detection-comparison/references/ref-26.png
+
+# Or from a twenty PR screenshot:
+curl -sL -o comparison/m5-ai-detection-comparison/references/ref-26.png \
+  https://github.com/user-attachments/assets/<uuid>
+
+# Then crop to 1440×900 in place:
 sips -z 900 1440 --cropToHeightWidth 900 1440 \
-  comparison/m5-ai-detection-comparison/references/ref-17.png \
-  --out comparison/m5-ai-detection-comparison/references/ref-17.png
+  comparison/m5-ai-detection-comparison/references/ref-26.png \
+  --out comparison/m5-ai-detection-comparison/references/ref-26.png
 ```
 
-Then `git add` the new `ref-NN.png` alongside the `_provenance.tsv` change.
+Add a row to `_provenance.tsv` and `git add` both the new `ref-NN.png` and the TSV change.
 
 ## Coverage
 
-A mix of CRM surfaces matching the prototypes' surface area: main table layout, record detail panel, view menu, navigation bar, command palette, search, kanban pipeline (×3 variants), record-scoped email inbox, notes editor, import wizard, view config, object/field settings, inline new-field affordance, favorites. If a prototype only ever shows a single surface (e.g. just a kanban), the reference set will sometimes pair it against a non-kanban surface — that's fine: the judge is grading craft, not surface match.
+The active 5 cover three CRM surface families: table list (ref-01, ref-02), kanban pipeline (ref-07), and record detail (ref-10 emails tab, ref-17 timeline tab). If a prototype only ever shows a single surface (e.g. just a kanban), the reference set will sometimes pair it against a non-kanban surface — that's fine: the judge is grading craft, not surface match.
 
 ## Sizing
 

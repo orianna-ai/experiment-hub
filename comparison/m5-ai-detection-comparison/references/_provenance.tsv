@@ -1,16 +1,5 @@
 ref-01.png	grounding/twenty/packages/twenty-docs/images/user-guide/home/main-layout.png	main app layout: sidebar + companies table
 ref-02.png	grounding/twenty/packages/twenty-docs/images/user-guide/home/side-panel.png	record detail side panel open over table
-ref-03.png	grounding/twenty/packages/twenty-docs/images/user-guide/home/view-menu.png	view-switcher dropdown open
-ref-04.png	grounding/twenty/packages/twenty-docs/images/user-guide/home/navigation-bar.png	left navigation bar focus
-ref-05.png	grounding/twenty/packages/twenty-docs/images/user-guide/home/command-menu.png	cmd-k command palette
-ref-06.png	grounding/twenty/packages/twenty-docs/images/user-guide/home/search-bar.png	global search results
 ref-07.png	grounding/twenty/packages/twenty-docs/images/user-guide/kanban-views/compact-view.png	kanban pipeline (compact density)
-ref-08.png	grounding/twenty/packages/twenty-docs/images/user-guide/kanban-views/filter.png	kanban with filter chip applied
-ref-09.png	grounding/twenty/packages/twenty-docs/images/user-guide/kanban-views/edit-stage.png	kanban with edit-stage popover
 ref-10.png	grounding/twenty/packages/twenty-docs/images/user-guide/emails/show-inbox.png	emails inbox inside record view
-ref-11.png	grounding/twenty/packages/twenty-docs/images/user-guide/notes/add-note.png	notes panel with rich-text editor
-ref-12.png	grounding/twenty/packages/twenty-docs/images/user-guide/import-export-data/match-columns.png	import wizard: column matching step
-ref-13.png	grounding/twenty/packages/twenty-docs/images/user-guide/views/default-view.png	default record view configuration
-ref-14.png	grounding/twenty/packages/twenty-docs/images/user-guide/objects/customize-fields.png	object settings: field list
-ref-15.png	grounding/twenty/packages/twenty-docs/images/user-guide/fields/quick-new-field.png	inline new-field affordance on table
-ref-16.png	grounding/twenty/packages/twenty-docs/images/user-guide/tips/favorites.png	favorites section in nav
+ref-17.png	https://github.com/twentyhq/twenty/pull/19800	record detail view with activity timeline (Google company)
