@@ -1,0 +1,1 @@
+Somehow was darkmode by default in this pass, not sure why. Generally speaking the spacing looks improved, the dotted borders seem like an AI smell & I still see a lot of AI smell but the overall task seems aligned to the goal of the task.

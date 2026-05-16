@@ -1,0 +1,1 @@
+Changed "data scope" & "technical diff" components mainly, it seems like a design decision at the design system level & an over-use of tables for mid density level by a CRM standard.

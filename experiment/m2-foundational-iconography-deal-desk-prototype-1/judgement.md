@@ -1,0 +1,1 @@
+AI just cannot work on icons for some reason, it generated tons of slop not improvements. Better to limit to the set of icons that exist in codebase as a guardrail IMO. 

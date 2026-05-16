@@ -1,0 +1,1 @@
+Everything looks slightly different, small changes to icon color weights & info hierarchy in a way that I'm not sure I actually agree with the direction. It's not explicitly bad though.

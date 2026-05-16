@@ -1,0 +1,1 @@
+Got rid of some AI code smells that I haven't seen drop before (e.g: dotted borders). Seems more inline with overall code system, specifically the border radiuses. I am generally not impressed with this rev though, the change is minimal for the goal & setup.

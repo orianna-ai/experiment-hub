@@ -1,0 +1,1 @@
+Initial 2s judgement is that hierarchy looks actually considered. v1 looks like backend eng & v2 looks like at least a UIEng if not a designer. 

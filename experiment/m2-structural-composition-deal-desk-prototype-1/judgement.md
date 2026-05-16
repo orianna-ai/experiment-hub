@@ -1,0 +1,1 @@
+This feels both like a better design & a big departure from the design system. I used to work on a CRM and data density is kind of part of the system which is why you see so much of it in twenties designs. That said, this feels easier to parse relative to what I'd expect & I think I'd spend SO much time scrolling as a user of this app that I'd be frustrated.

@@ -1,0 +1,1 @@
+The typesystem seems most inline with what I'd expect from this mock. I find spacing more consistent as well. 

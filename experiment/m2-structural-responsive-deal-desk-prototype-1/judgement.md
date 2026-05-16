@@ -1,0 +1,1 @@
+Definitely a good refinement & the best pass on responsiveness across the board. It respects larger touch targets too. 

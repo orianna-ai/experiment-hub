@@ -1,0 +1,1 @@
+Some tells are definitely missing & I also see an improvement. Should rev on the actual tells that are in the prompt.

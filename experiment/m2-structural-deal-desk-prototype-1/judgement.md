@@ -1,0 +1,1 @@
+Across the deeply nested components hierarchy is improved. At the top though... WTF is happening here, some weird gradient choices, "Affects" being emphasized so much. It feels like my early days of design over-emphasizing rather than helpful.

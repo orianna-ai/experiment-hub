@@ -1,0 +1,1 @@
+Somehow this did more than grid tests including color (e.g: warning under opportunity). Screwed up the selected radial button somehow.

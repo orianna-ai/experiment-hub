@@ -1,0 +1,1 @@
+Looking at this I still see AI slop tells (e.g: left border of needs admin approval) & still some purple gradients etc. It seems like it fixed some things but not all and just said it was completed without actually completing.
