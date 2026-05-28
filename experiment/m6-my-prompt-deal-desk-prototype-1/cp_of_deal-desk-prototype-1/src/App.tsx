@@ -112,13 +112,12 @@ export default function App() {
           <div className="page">
             <div className="page-header">
               <div>
+                <div className="eyebrow">{I.sparkles}<span>Proposed by Claude</span></div>
                 <h1>Deal Desk</h1>
                 <div className="meta">
-                  <Tag color="blue" variant="solid">{I.sparkles} Proposed by Claude</Tag>
+                  <span>Drafted 3 min ago</span>
                   <span className="dot" />
-                  <span>3 min ago</span>
-                  <span className="dot" />
-                  <span>v0.1 draft</span>
+                  <span>Version 0.1</span>
                 </div>
               </div>
               <div className="actions">
@@ -141,56 +140,45 @@ export default function App() {
                   <div className="change-list">
                     <div className="change-row-wrap">
                       <div className="main">
-                        <span className="icon">{I.apps}</span>
                         <span className="label">New panel on Opportunity</span>
-                        <span className="detail">· Procurement, Security, Legal review</span>
-                        <span className="grow" />
-                        <Tag color="green">Safe</Tag>
+                        <span className="detail">Procurement, Security, Legal review</span>
                       </div>
                     </div>
-                    <div className="change-row-wrap">
+                    <div className="change-row-wrap flag">
                       <div className="main">
-                        <span className="icon">{I.database}</span>
                         <span className="label">3 new fields on Opportunity</span>
-                        <span className="detail">· Procurement, Security Review, Legal Review</span>
+                        <span className="detail">Procurement, Security Review, Legal Review</span>
                         <span className="grow" />
-                        <Tag color="amber">Caution</Tag>
+                        <Tag color="amber">Review</Tag>
                       </div>
                       <div className="conflict">
                         {I.warning}
-                        <span>Looks similar to existing field "Sec. Review" — review before deploying.</span>
+                        <span>Looks similar to existing field "Sec. Review".</span>
                       </div>
                     </div>
                     <div className="change-row-wrap">
                       <div className="main">
-                        <span className="icon">{I.database}</span>
-                        <span className="label">New object: Mutual Action Plan</span>
-                        <span className="detail">· linked to Opportunity</span>
-                        <span className="grow" />
-                        <Tag color="green">Safe</Tag>
+                        <span className="label">New object · Mutual Action Plan</span>
+                        <span className="detail">Linked to Opportunity</span>
                       </div>
                     </div>
-                    <div className="change-row-wrap">
+                    <div className="change-row-wrap flag">
                       <div className="main">
-                        <span className="icon">{I.robot}</span>
                         <span className="label">New AI agent</span>
-                        <span className="detail">· Drafts deal-risk summaries</span>
+                        <span className="detail">Drafts deal-risk summaries</span>
                         <span className="grow" />
-                        <Tag color="amber">Caution</Tag>
+                        <Tag color="amber">Review</Tag>
                       </div>
                     </div>
                     <div className="change-row-wrap">
                       <div className="main">
-                        <span className="icon">{I.route}</span>
                         <span className="label">New workflow</span>
-                        <span className="detail">· Auto-route to Legal when stage = Negotiation</span>
-                        <span className="grow" />
-                        <Tag color="green">Safe</Tag>
+                        <span className="detail">Auto-route to Legal at Negotiation</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="show-all">Show all (8)</div>
+                  <div className="show-all">Show 3 more changes</div>
                 </div>
 
                 <div className="trust-stack">
@@ -231,34 +219,30 @@ export default function App() {
             <div>
               <div className="tablist">
                 <div className={`tab ${tab === 'simulate' ? 'active' : ''}`} onClick={() => setTab('simulate')}>
-                  {I.sparkles}<span>Simulate</span>
+                  <span>Simulate</span>
                 </div>
                 <div className={`tab ${tab === 'permissions' ? 'active' : ''}`} onClick={() => setTab('permissions')}>
-                  {I.shield}<span>Permissions &amp; agent</span>
+                  <span>Permissions &amp; agent</span>
                 </div>
                 <div className={`tab ${tab === 'rollout' ? 'active' : ''}`} onClick={() => setTab('rollout')}>
-                  {I.rocket}<span>Rollout</span>
+                  <span>Rollout</span>
                 </div>
                 <div className={`tab ${tab === 'diff' ? 'active' : ''}`} onClick={() => setTab('diff')}>
-                  {I.build}<span>Technical diff</span>
+                  <span>Technical diff</span>
                 </div>
               </div>
 
               {tab === 'simulate' && (
                 <div className="simulate">
                   <div className="sim-sidebar">
-                    <div className="dryrun-pill">
-                      <Tag color="amber" variant="outline">
-                        {I.bellOff} Dry-run preview · No data will be written
-                      </Tag>
-                    </div>
+                    <div className="sim-sidebar-head">Sample opportunities</div>
                     {SAMPLE_OPPS.map((o, i) => (
                       <div key={i} className={`sim-opp ${i === activeOpp ? 'active' : ''}`} onClick={() => setActiveOpp(i)}>
                         <div className="name">{o.name}</div>
-                        <div className="meta"><span>{o.amount}</span><span>·</span><span>{o.stage}</span></div>
+                        <div className="meta"><span>{o.amount}</span><span className="dot" /><span>{o.stage}</span></div>
                       </div>
                     ))}
-                    <div style={{ padding: 'var(--space-3)' }}>
+                    <div className="sim-sidebar-foot">
                       <button className="btn sm" style={{ width: '100%', justifyContent: 'center' }}>Try another sample</button>
                     </div>
                   </div>
@@ -294,7 +278,6 @@ export default function App() {
 
                       <div className="panel">
                         <div className="panel-head">
-                          {I.apps}
                           <span>Deal Desk</span>
                           <Tag color="purple" variant="solid">New</Tag>
                         </div>
@@ -321,7 +304,7 @@ export default function App() {
                           </div>
 
                           <div className="ai-summary">
-                            <div className="head">{I.sparkles}<span>AI deal-risk summary</span><Tag color="purple" variant="solid">AI preview</Tag></div>
+                            <div className="head">{I.sparkles}<span>AI deal-risk summary</span></div>
                             <p>
                               Acme's procurement team has been silent for 9 days — historically a 2.4× risk
                               signal at this stage. Legal review hasn't started despite a target close of
@@ -330,10 +313,10 @@ export default function App() {
                             </p>
                           </div>
 
-                          <div style={{ marginTop: 'var(--space-3)' }}>
-                            <div className="small muted" style={{ marginBottom: 4 }}>Workflow would trigger:</div>
-                            <span className="side-effect-chip">{I.bellOff}<span>Would create task: Legal review for Acme</span></span>
-                            <span className="side-effect-chip">{I.bellOff}<span>Would email legal@acme.com</span></span>
+                          <div className="side-effects">
+                            <div className="side-effects-label">Workflow would trigger</div>
+                            <span className="side-effect-chip"><span>Create task · Legal review for Acme</span></span>
+                            <span className="side-effect-chip"><span>Email legal@acme.com</span></span>
                           </div>
                         </div>
                       </div>

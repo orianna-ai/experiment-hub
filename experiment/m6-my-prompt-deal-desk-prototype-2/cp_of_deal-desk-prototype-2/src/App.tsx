@@ -346,8 +346,8 @@ const Section1Summary = ({
   return (
     <div className="section">
       <div className="section-header">
-        <div className="section-num">1</div>
         <div className="section-title">What changes</div>
+        <div className="section-sub">A summary of everything this app adds to your workspace.</div>
       </div>
       <div className="card">
         <div className="summary-headline">
@@ -532,8 +532,8 @@ const Section2Preview = () => {
   return (
     <div className="section">
       <div className="section-header">
-        <div className="section-num">2</div>
         <div className="section-title">Try it on a sample deal</div>
+        <div className="section-sub">See exactly how the app changes a record before it ships.</div>
       </div>
       <div className="card">
         <div className="preview-bar">
@@ -588,13 +588,7 @@ const Section2Preview = () => {
 
             <div className="field-section-title">
               Deal Desk
-              <span
-                className="chip info"
-                style={{ marginLeft: 8, fontSize: 10 }}
-              >
-                <IconSparkles size={10} />
-                Added by app
-              </span>
+              <span className="added-tag">Added by app</span>
             </div>
             <div className="field-row">
               <div className="field-label">
@@ -625,11 +619,7 @@ const Section2Preview = () => {
             </div>
 
             <div className="deal-desk-panel">
-              <div className="deal-desk-panel-tag">Deal Desk panel</div>
-              <div className="deal-desk-title">
-                <IconShieldCheck size={14} />
-                Mutual action plan
-              </div>
+              <div className="deal-desk-title">Mutual action plan</div>
               <div className="deal-desk-checks">
                 <div className="deal-desk-check">
                   <span className="dd-check-icon complete">
@@ -664,8 +654,11 @@ const Section2Preview = () => {
             </div>
 
             <div className="ai-preview-wrap">
-              <div className="ai-preview-tag">AI preview</div>
-              <div className="ai-preview-title">Deal risk summary</div>
+              <div className="ai-preview-title">
+                <IconSparkles size={13} />
+                Deal risk summary
+                <span className="ai-preview-badge">AI</span>
+              </div>
               <div className="ai-preview-body">
                 Acme is on track for an end-of-month close, but security
                 review is the critical path: the prospect has not returned a
@@ -816,8 +809,8 @@ const Section3Permissions = ({
   return (
     <div className="section">
       <div className="section-header">
-        <div className="section-num">3</div>
         <div className="section-title">What the AI agent can do</div>
+        <div className="section-sub">Permissions the agent uses, checked against workspace policy.</div>
       </div>
       <div className="card">
         <div className="agent-header-row">
@@ -876,8 +869,8 @@ const Section4Rollout = ({
   return (
     <div className="section">
       <div className="section-header">
-        <div className="section-num">4</div>
         <div className="section-title">Who gets it</div>
+        <div className="section-sub">Choose the audience and how long the rollout runs.</div>
       </div>
       <div className="card">
         <div className="filter-row">
