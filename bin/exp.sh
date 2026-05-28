@@ -36,10 +36,28 @@ extract_prompt() {
 }
 
 allocate_port() {
-  local max
+  local max port
   max=$(grep -h '^PORT=' "$ROOT"/experiment/*/.env 2>/dev/null \
         | awk -F= '{print $2}' | sort -n | tail -1)
-  echo $(( ${max:-5199} + 1 ))
+  port=$(( ${max:-5199} + 1 ))
+  while lsof -ti :"$port" >/dev/null 2>&1; do
+    port=$((port + 1))
+  done
+  echo "$port"
+}
+
+acquire_lock() {
+  local lock=$1 waited=0
+  while ! mkdir "$lock" 2>/dev/null; do
+    waited=$((waited + 1))
+    [ "$waited" -lt 600 ] || die "timed out waiting for lock: $lock"
+    sleep 0.1
+  done
+}
+
+release_lock() {
+  local lock=$1
+  rmdir "$lock" 2>/dev/null || true
 }
 
 working_copy_dir() {
@@ -47,13 +65,59 @@ working_copy_dir() {
   find "$dir" -maxdepth 1 -type d -name 'cp_of_*' | head -1
 }
 
+copy_origin() {
+  local origin_dir=$1 dest=$2
+  mkdir -p "$dest"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a \
+      --exclude node_modules \
+      --exclude dist \
+      --exclude .vite \
+      --exclude .vite-temp \
+      --exclude tsconfig.tsbuildinfo \
+      --exclude .cached-before.png \
+      "$origin_dir/" "$dest/"
+  else
+    (
+      cd "$origin_dir"
+      tar \
+        --exclude './node_modules' \
+        --exclude './dist' \
+        --exclude './.vite' \
+        --exclude './.vite-temp' \
+        --exclude './tsconfig.tsbuildinfo' \
+        --exclude './.cached-before.png' \
+        -cf - .
+    ) | (cd "$dest" && tar -xf -)
+  fi
+}
+
 screenshot() {
   local url=$1 out=$2
   npx --yes playwright screenshot --viewport-size="$VIEWPORT" --wait-for-timeout=1500 "$url" "$out"
 }
 
+pid_is_descendant() {
+  local parent=$1 child=$2 current=$2
+  while [ -n "$current" ] && [ "$current" != "1" ]; do
+    [ "$current" = "$parent" ] && return 0
+    current=$(ps -o ppid= -p "$current" 2>/dev/null | tr -d '[:space:]')
+  done
+  return 1
+}
+
+kill_tree() {
+  local pid=$1 child
+  [ -n "$pid" ] || return 0
+  for child in $(pgrep -P "$pid" 2>/dev/null || true); do
+    kill_tree "$child"
+  done
+  kill "$pid" 2>/dev/null || true
+}
+
 serve_bg() {
-  local app_dir=$1 port=$2 pidfile=$3
+  local app_dir=$1 port=$2 pidfile=$3 log
+  log=${4:-/tmp/exp-$port.log}
   # Refuse to spawn if the port is already occupied — otherwise our vite would silently
   # fail (--strictPort) and curl would happily get answers from whatever was already
   # bound, corrupting screenshots taken against $port.
@@ -61,26 +125,28 @@ serve_bg() {
     die "port $port already in use — refusing to spawn (would race with existing server)"
   fi
   ( cd "$app_dir" && [ -d node_modules ] || pnpm install )
-  ( cd "$app_dir" && pnpm exec vite --port "$port" --strictPort >/tmp/exp-$port.log 2>&1 & echo $! > "$pidfile" )
+  ( cd "$app_dir" && pnpm exec vite --port "$port" --strictPort >"$log" 2>&1 & echo $! > "$pidfile" )
   # Wait for the server, *and* verify the PID we spawned owns the port.
   local spawned_pid; spawned_pid=$(cat "$pidfile" 2>/dev/null)
   for _ in $(seq 1 80); do
     sleep 0.25
     if curl -sf "http://localhost:$port/" >/dev/null; then
-      local owner; owner=$(lsof -ti :"$port" 2>/dev/null)
-      # Match if the owner pid is the one we spawned OR a descendant of it.
-      if [ -n "$owner" ] && { [ "$owner" = "$spawned_pid" ] || pgrep -P "$spawned_pid" 2>/dev/null | grep -qx "$owner"; }; then
-        return 0
-      fi
+      local owner
+      for owner in $(lsof -ti :"$port" 2>/dev/null | sort -u); do
+        # Match if the owner pid is the one we spawned OR a descendant of it.
+        if [ "$owner" = "$spawned_pid" ] || pid_is_descendant "$spawned_pid" "$owner"; then
+          return 0
+        fi
+      done
     fi
   done
-  die "dev server on $port never came up cleanly — see /tmp/exp-$port.log"
+  die "dev server on $port never came up cleanly — see $log"
 }
 
 stop_bg() {
   local pidfile=$1
   [ -f "$pidfile" ] || return 0
-  kill "$(cat "$pidfile")" 2>/dev/null || true
+  kill_tree "$(cat "$pidfile")"
   rm -f "$pidfile"
 }
 
@@ -97,12 +163,15 @@ cmd_new() {
   prompt=$(extract_prompt "$id")
   [ -n "$prompt" ] || die "no prompt found for id '$id' in EXPERIMENTS.md"
 
-  local port
+  local port port_lock
+  port_lock="$ROOT/experiment/.port.lock"
+  acquire_lock "$port_lock"
   port=$(allocate_port)
 
   mkdir -p "$dir/screenshots"
   echo "PORT=$port" > "$dir/.env"
-  cp -R "$ROOT/origin/$origin" "$dir/cp_of_$origin"
+  release_lock "$port_lock"
+  copy_origin "$ROOT/origin/$origin" "$dir/cp_of_$origin"
 
   # Reuse cached before.png if origin has one (avoids re-serving origin per run).
   local cached="$ROOT/origin/$origin/.cached-before.png"
@@ -152,11 +221,13 @@ cmd_before() {
   local wc; wc=$(working_copy_dir "$dir") || die "no cp_of_* in $dir"
   local origin; origin=$(basename "$wc" | sed 's/^cp_of_//')
   local pidfile="/tmp/exp-before-$$.pid"
+  local scratch_lock="$ROOT/experiment/.scratch-port.lock"
 
+  acquire_lock "$scratch_lock"
+  trap 'stop_bg "$pidfile"; release_lock "$scratch_lock"' EXIT
   serve_bg "$ROOT/origin/$origin" "$SCRATCH_PORT" "$pidfile"
-  trap "stop_bg $pidfile" EXIT
   screenshot "http://localhost:$SCRATCH_PORT/" "$dir/screenshots/before.png"
-  stop_bg "$pidfile"; trap - EXIT
+  stop_bg "$pidfile"; release_lock "$scratch_lock"; trap - EXIT
   echo "wrote $dir/screenshots/before.png"
 }
 
@@ -211,14 +282,8 @@ cmd_run() {
 
   # Background-serve the working copy.
   local pidfile="$dir/.serve.pid"
-  ( cd "$dir/cp_of_$origin" && [ -d node_modules ] || pnpm install )
-  ( cd "$dir/cp_of_$origin" && pnpm exec vite --port "$PORT" --strictPort >"$dir/.serve.log" 2>&1 & echo $! > "$pidfile" )
-  trap '[ -f "$pidfile" ] && kill "$(cat "$pidfile")" 2>/dev/null; rm -f "$pidfile"' EXIT
-  for _ in $(seq 1 80); do
-    sleep 0.25
-    curl -sf "http://localhost:$PORT/" >/dev/null && break
-  done
-  curl -sf "http://localhost:$PORT/" >/dev/null || die "working-copy server didn't come up — see $dir/.serve.log"
+  serve_bg "$dir/cp_of_$origin" "$PORT" "$pidfile" "$dir/.serve.log"
+  trap 'stop_bg "$pidfile"' EXIT
 
   # Run claude headlessly. cwd = experiment dir so the agent sees prompt.md / findings.md / cp_of_*/ siblings.
   local blind=0
@@ -275,8 +340,7 @@ Prompt:
   local duration=$((end_ts - start_ts))
 
   cmd_after "$name" || true
-  kill "$(cat "$pidfile")" 2>/dev/null || true
-  rm -f "$pidfile"
+  stop_bg "$pidfile"
   trap - EXIT
 
   write_cost "$dir" "$duration"
@@ -347,10 +411,12 @@ cmd_prep() {
 
   ( cd "$origin_dir" && [ -d node_modules ] || pnpm install )
   local pidfile="/tmp/exp-prep-$$.pid"
+  local scratch_lock="$ROOT/experiment/.scratch-port.lock"
+  acquire_lock "$scratch_lock"
+  trap 'stop_bg "$pidfile"; release_lock "$scratch_lock"' EXIT
   serve_bg "$origin_dir" "$SCRATCH_PORT" "$pidfile"
-  trap 'stop_bg '"$pidfile" EXIT
   screenshot "http://localhost:$SCRATCH_PORT/" "$cache"
-  stop_bg "$pidfile"; trap - EXIT
+  stop_bg "$pidfile"; release_lock "$scratch_lock"; trap - EXIT
   echo "cached $cache"
 }
 

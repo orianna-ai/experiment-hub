@@ -1,0 +1,30 @@
+{
+  "source_pr_url": "https://github.com/unkeyed/unkey/pull/5540",
+  "source_repo": "unkeyed/unkey",
+  "source_pr_number": 5540,
+  "fixture_name": "unkey-5540-env-vars-onboarding",
+  "primary_surface": "Project onboarding configure environment variables step",
+  "surfaces": [
+    "project creation/new project frame",
+    "select repository step with GitHub hint link pattern",
+    "configure deployment step",
+    "configure environment variables onboarding step using shared DeploymentEnvVars",
+    "add environment variable slide panel",
+    "deploy action",
+    "deployment-complete state",
+    "project overview Environment Variables page using the same DeploymentEnvVars surface"
+  ],
+  "mocked_dependencies": [
+    "workspace/auth/session",
+    "GitHub installation and repositories",
+    "TRPC deployment and env-var mutations",
+    "project data provider",
+    "deployment progress polling",
+    "collection persistence"
+  ],
+  "verification": {
+    "build_command": "pnpm build",
+    "runtime_command": "pnpm exec vite --host 127.0.0.1 --port 5177 --strictPort",
+    "expected_first_load": "The app opens inside the Unkey dashboard frame on the onboarding Configure environment variables step, with Environment Variables, Add Environment Variable, filters, env-var rows, and Deploy visible."
+  }
+}

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  <!-- <script src="http://localhost:8097"></script> -->
+  <style id="inspector-styles">
+    .inspector-highlight {
+      position: fixed;
+      pointer-events: none;
+      border: 2px solid #007bff;
+      background: rgba(0, 123, 255, 0.1);
+      z-index: 999999;
+      transition: all 0.05s ease-out;
+    }
+    .inspector-selected {
+      position: fixed;
+      pointer-events: none;
+      border: 2px solid #28a745;
+      background: rgba(40, 167, 69, 0.1);
+      z-index: 999998;
+    }
+    .inspector-label {
+      position: fixed;
+      background: #007bff;
+      color: white;
+      font-size: 11px;
+      font-family: monospace;
+      padding: 2px 6px;
+      border-radius: 2px;
+      z-index: 1000000;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .inspector-label.selected {
+      background: #28a745;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 4px;
+    }
+    .inspector-label-close {
+      cursor: pointer;
+      opacity: 0.8;
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 1;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.2);
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .inspector-label-close:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    body.inspector-active * {
+      cursor: crosshair !important;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Inspector state
+    let inspectorEnabled = false;
+    let highlightEl = null;
+    let selectedHighlightEl = null;
+    let labelEl = null;
+    let selectedLabelEl = null;
+    let selectedElement = null;
+    let hoveredElement = null;
+    let selectionLocked = false;
+
+    function createHighlightElements() {
+      if (!highlightEl) {
+        highlightEl = document.createElement('div');
+        highlightEl.className = 'inspector-highlight';
+        highlightEl.style.display = 'none';
+        document.body.appendChild(highlightEl);
+      }
+      if (!selectedHighlightEl) {
+        selectedHighlightEl = document.createElement('div');
+        selectedHighlightEl.className = 'inspector-selected';
+        selectedHighlightEl.style.display = 'none';
+        document.body.appendChild(selectedHighlightEl);
+      }
+      if (!labelEl) {
+        labelEl = document.createElement('div');
+        labelEl.className = 'inspector-label';
+        labelEl.style.display = 'none';
+        document.body.appendChild(labelEl);
+      }
+      if (!selectedLabelEl) {
+        selectedLabelEl = document.createElement('div');
+        selectedLabelEl.className = 'inspector-label selected';
+        selectedLabelEl.style.display = 'none';
+        selectedLabelEl.addEventListener('click', (e) => {
+          if (e.target.classList.contains('inspector-label-close')) {
+            clearSelection();
+            window.parent.postMessage({ type: 'inspectorClear' }, '*');
+          }
+        });
+        document.body.appendChild(selectedLabelEl);
+      }
+    }
+
+    function getElementInfo(el) {
+      if (!el) return null;
+
+      const rect = el.getBoundingClientRect();
+      const styles = window.getComputedStyle(el);
+
+      // Get a CSS selector path
+      function getSelector(element) {
+        if (element.id) return `#${element.id}`;
+
+        let selector = element.tagName.toLowerCase();
+        if (element.className && typeof element.className === 'string') {
+          const classes = element.className.trim().split(/\s+/).filter(c =>
+            !c.startsWith('inspector-') && c.length > 0
+          ).slice(0, 3);
+          if (classes.length) selector += '.' + classes.join('.');
+        }
+        return selector;
+      }
+
+      // Get path from root
+      function getPath(element) {
+        const path = [];
+        let current = element;
+        while (current && current !== document.body && path.length < 5) {
+          path.unshift(getSelector(current));
+          current = current.parentElement;
+        }
+        return path.join(' > ');
+      }
+
+      // Get relevant styles
+      const relevantStyles = {
+        display: styles.display,
+        position: styles.position,
+        width: styles.width,
+        height: styles.height,
+        padding: styles.padding,
+        margin: styles.margin,
+        color: styles.color,
+        backgroundColor: styles.backgroundColor,
+        fontSize: styles.fontSize,
+        fontFamily: styles.fontFamily,
+      };
+
+      return {
+        tagName: el.tagName.toLowerCase(),
+        id: el.id || null,
+        className: el.className || null,
+        selector: getSelector(el),
+        path: getPath(el),
+        rect: {
+          x: Math.round(rect.x),
+          y: Math.round(rect.y),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        },
+        text: el.textContent?.slice(0, 100) || null,
+        attributes: Array.from(el.attributes || []).reduce((acc, attr) => {
+          if (!attr.name.startsWith('data-reactroot')) {
+            acc[attr.name] = attr.value;
+          }
+          return acc;
+        }, {}),
+        styles: relevantStyles,
+        innerHTML: el.innerHTML?.slice(0, 500) || null,
+        outerHTML: el.outerHTML?.slice(0, 1000) || null,
+      };
+    }
+
+    function updateHighlight(el, highlightElement, labelElement, isSelected = false) {
+      if (!el || el === document.body || el === document.documentElement) {
+        highlightElement.style.display = 'none';
+        labelElement.style.display = 'none';
+        return;
+      }
+
+      const rect = el.getBoundingClientRect();
+
+      highlightElement.style.display = 'block';
+      highlightElement.style.left = rect.left + 'px';
+      highlightElement.style.top = rect.top + 'px';
+      highlightElement.style.width = rect.width + 'px';
+      highlightElement.style.height = rect.height + 'px';
+
+      // Update label
+      let labelText = el.tagName.toLowerCase();
+      if (el.id) labelText += `#${el.id}`;
+      else if (el.className && typeof el.className === 'string') {
+        const classes = el.className.trim().split(/\s+/).filter(c => !c.startsWith('inspector-'));
+        if (classes.length) labelText += `.${classes[0]}`;
+      }
+      labelText += ` ${Math.round(rect.width)}×${Math.round(rect.height)}`;
+
+      if (isSelected) {
+        // Add close button for selected label
+        labelElement.innerHTML = `<span>${labelText}</span><span class="inspector-label-close" id="inspector-close-btn">×</span>`;
+        labelElement.style.display = 'flex';
+      } else {
+        labelElement.textContent = labelText;
+        labelElement.style.display = 'block';
+      }
+      labelElement.style.left = rect.left + 'px';
+      labelElement.style.top = Math.max(0, rect.top - 20) + 'px';
+    }
+
+    function handleMouseMove(e) {
+      if (!inspectorEnabled) return;
+
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el && !el.className?.includes?.('inspector-')) {
+        hoveredElement = el;
+        // Always show hover highlight for potential selection
+        updateHighlight(el, highlightEl, labelEl);
+      }
+    }
+
+    function handleClick(e) {
+      if (!inspectorEnabled) return;
+
+      // Prevent any duplicate processing
+      if (selectionLocked) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el || el.className?.includes?.('inspector-')) return;
+
+      // Skip if clicking the exact same element again
+      if (el === selectedElement) return;
+
+      // Lock selection to prevent any duplicate messages
+      selectionLocked = true;
+
+      const info = getElementInfo(el);
+      selectedElement = el;
+      updateHighlight(el, selectedHighlightEl, selectedLabelEl, true);
+
+      // Send selection to parent (only once)
+      window.parent.postMessage({
+        type: 'inspectorSelect',
+        element: info
+      }, '*');
+
+      // Unlock after a short delay
+      setTimeout(() => {
+        selectionLocked = false;
+      }, 200);
+    }
+
+    function enableInspector() {
+      inspectorEnabled = true;
+      document.body.classList.add('inspector-active');
+      createHighlightElements();
+      document.addEventListener('mousemove', handleMouseMove, true);
+      document.addEventListener('click', handleClick, true);
+    }
+
+    function disableInspector() {
+      inspectorEnabled = false;
+      document.body.classList.remove('inspector-active');
+      document.removeEventListener('mousemove', handleMouseMove, true);
+      document.removeEventListener('click', handleClick, true);
+
+      if (highlightEl) highlightEl.style.display = 'none';
+      if (labelEl) labelEl.style.display = 'none';
+      // Keep selected element visible
+    }
+
+    function clearSelection() {
+      selectedElement = null;
+      if (selectedHighlightEl) selectedHighlightEl.style.display = 'none';
+      if (selectedLabelEl) selectedLabelEl.style.display = 'none';
+    }
+
+    // Listen for messages from the parent window
+    window.addEventListener("message", (event) => {
+      const { type, css, js } = event.data;
+
+      if (type === 'preview') {
+        // Clear selection when preview updates
+        clearSelection();
+        window.parent.postMessage({ type: 'inspectorClear' }, '*');
+
+        document.head.querySelectorAll("style:not(#inspector-styles)").forEach(style => style.remove());
+        // Inject CSS into the document
+        const styleElement = document.createElement("style");
+        styleElement.textContent = css;
+        document.head.appendChild(styleElement);
+
+        document.body.innerHTML = `
+            <div id="root">
+            </div>
+        `;
+
+        // Inject and execute JavaScript in the document
+        const scriptElement = document.createElement("script");
+        scriptElement.textContent = js;
+        document.body.appendChild(scriptElement);
+
+        // Re-create highlight elements after DOM reset
+        highlightEl = null;
+        selectedHighlightEl = null;
+        labelEl = null;
+        selectedLabelEl = null;
+        if (inspectorEnabled) {
+          createHighlightElements();
+        }
+      } else if (type === 'inspectorEnable') {
+        enableInspector();
+      } else if (type === 'inspectorDisable') {
+        disableInspector();
+      } else if (type === 'inspectorClear') {
+        clearSelection();
+      } else if (type === 'setDarkMode') {
+        // Reflect the host's theme so user code that branches on
+        // `prefers-color-scheme` re-reads it, plus add a `windmill-dark`
+        // class that user CSS can opt into.
+        const dark = !!event.data.dark;
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document.documentElement.classList.toggle('windmill-dark', dark);
+      }
+    });
+  </script>
+</body>
+</html>

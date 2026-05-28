@@ -895,7 +895,9 @@ async function main() {
   const { origins, originPort, experiments } = inventory();
   for (const o of origins) await ensureServing(path.join(ROOT, 'origin', o), originPort[o], `origin/${o}`);
   for (const e of experiments) {
-    await ensureServing(path.join(ROOT, 'experiment', e.name, `cp_of_${e.origin}`), e.port, `exp/${e.name}`);
+    if (e.lifecycle === 'finished' || e.hasJudgement) {
+      await ensureServing(path.join(ROOT, 'experiment', e.name, `cp_of_${e.origin}`), e.port, `exp/${e.name}`);
+    }
   }
 
   const ui = http.createServer((req, res) => {

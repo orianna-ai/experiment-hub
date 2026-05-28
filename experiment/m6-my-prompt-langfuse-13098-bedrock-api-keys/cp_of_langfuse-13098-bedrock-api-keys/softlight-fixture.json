@@ -1,0 +1,31 @@
+{
+  "source_pr_url": "https://github.com/langfuse/langfuse/pull/13098",
+  "source_repo": "langfuse/langfuse",
+  "source_pr_number": 13098,
+  "fixture_name": "langfuse-13098-bedrock-api-keys",
+  "primary_surface": "Project Settings -> LLM Connections create dialog with Bedrock auth method tabs",
+  "surfaces": [
+    "Project Settings page shell",
+    "LLM Connections list/table with configured connections",
+    "New LLM Connection dialog",
+    "Bedrock authentication method tabs",
+    "Bedrock API key credential field",
+    "AWS access key credential fields",
+    "Update LLM Connection dialog",
+    "Delete LLM Connection confirmation",
+    "Validation errors for missing Bedrock credentials and custom models"
+  ],
+  "mocked_dependencies": [
+    "Next.js routing and SSR",
+    "authentication and RBAC",
+    "tRPC llmApiKey queries and mutations",
+    "database persistence",
+    "secret encryption",
+    "LLM provider test calls"
+  ],
+  "verification": {
+    "build": "pnpm build",
+    "runtime": "pnpm preview --host 0.0.0.0",
+    "expected_first_load": "New LLM Connection dialog is open on the Bedrock AWS access keys auth tab above the LLM Connections settings table, with the API key tab reachable in the same selector."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "source_pr_url": "https://github.com/windmill-labs/windmill/pull/9316",
+  "source_repo": "windmill-labs/windmill",
+  "source_pr_number": 9316,
+  "fixture_name": "windmill-9316-ui-builder-build-errors",
+  "primary_surface": "Raw app UI Builder editor with split source and Preview panes showing a build failure banner over the preview iframe.",
+  "surfaces": [
+    "Windmill raw app editor header with workspace path, summary, Jobs, AI, Draft, and Deploy actions",
+    "Raw app sidebar with frontend files, packages, backend runnables, data tables, lint error, and history sections",
+    "UI Builder editor/source iframe in the left pane",
+    "Preview tab and preview iframe in the right pane",
+    "PR build-error alert positioned over the preview iframe",
+    "Preview tab red tint while buildError is present",
+    "Bottom-right build logs overlay with collapsible state",
+    "Single-tab/collapsed preview mode where the tinted Preview tab is the visible error signal",
+    "Successful build state that clears the build-error banner and Preview tab tint"
+  ],
+  "mocked_dependencies": [
+    "Windmill auth/session",
+    "Workspace and app metadata",
+    "Backend services normally used by the UI Builder bundled artifact",
+    "Preview iframe app bundle",
+    "Datatable and background runnable responses",
+    "Build logs and seeded buildError postMessage-visible state"
+  ],
+  "verification": {
+    "build": "pnpm build",
+    "runtime": "Run a local Vite preview/dev server and inspect the first load plus split/build/log controls.",
+    "pr_change": "The first load must show a red Build failed banner over the preview pane and red Preview tab tint; toggling split must leave the red Preview tab visible when the preview pane is collapsed."
+  }
+}
