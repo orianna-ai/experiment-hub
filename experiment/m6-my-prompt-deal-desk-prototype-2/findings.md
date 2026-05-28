@@ -6,14 +6,50 @@
 | ![before](./screenshots/before.png) | ![after](./screenshots/after.png) |
 
 ## Goal achievement
-TBD
+Achieved. The Deal Desk review screen was redesigned from an AI-default look into a
+restrained, professionally-styled surface that holds up against the reference designs
+(Stripe / Copilot-style clean SaaS dashboards). Across the four core surfaces — What
+changes, Try it on a sample deal, What the AI agent can do, Who gets it — the page now
+reads with a single-accent palette, strong typographic hierarchy, and generous whitespace
+rather than the original crowded, multi-color, gimmicky layout.
+
+Key "AI tells" removed or fixed:
+- Numbered circle badges (1–4) on each section → clean section titles plus a one-line
+  muted description (better information scent + hierarchy).
+- Floating absolute-positioned tag chips ("Deal Desk panel", "AI preview") → integrated
+  into clean inline headers.
+- Dashed yellow/gray boxes (AI summary, estimate row) → solid, subtle, intentional cards.
+- Loud competing accent colors everywhere → one indigo accent reserved for primary actions
+  and links; status colors (amber/green/red) used only where they carry meaning.
+- Over-used uppercase micro-labels at field level → softened to sentence case; uppercase
+  eyebrows kept only at section level and used sparingly.
+- Reduced icon noise (sidebar icons muted to tertiary, removed redundant inline icons).
+- Cramped 14px layout → larger type scale, more padding, breathing room, and a refined
+  sticky deploy bar with a frosted backdrop.
 
 ## Cost
-- wall time:
-- tokens:
+- wall time: 10m 41s
+- turns: 55
+- tokens (input / cache-create / cache-read / output): 110 / 175347 / 4873650 / 30681
+- $ estimate: $4.300318750000001
 
 ## How Claude achieved it
-TBD
+1. Read the single-file React app (`src/App.tsx`) and stylesheet (`src/styles.css`) and
+   captured the current state with Playwright (the app uses an inner scroll container, so a
+   tall viewport was used to capture every surface in one image).
+2. Downloaded all seven reference images and studied them to extract the shared design
+   language: generous whitespace, one accent color, bold/clear heading hierarchy, muted
+   uppercase section eyebrows, subtle 1px card borders, and minimal icon use.
+3. Rewrote the design system in `styles.css` — new neutral + indigo token palette, larger
+   type scale and spacing, refined cards (radius/shadow), restyled chips/switches/buttons,
+   a frosted sticky deploy bar, and replaced dashed boxes with solid subtle surfaces.
+4. Made surgical edits in `App.tsx`: removed the numbered section circles and added a muted
+   one-line subtitle per section; removed the floating absolute tag chips; integrated the
+   AI summary and Deal Desk panel headers inline; softened the "Added by app" marker.
+5. Iterated against screenshots of each surface (header, summary, sample-deal preview,
+   permissions, rollout), cropping regions for detail review, fixing a wrapping deal-size
+   input prefix, and comparing the result side-by-side with the reference designs until no
+   obvious AI tells remained.
 
 ## Prompt
 ```

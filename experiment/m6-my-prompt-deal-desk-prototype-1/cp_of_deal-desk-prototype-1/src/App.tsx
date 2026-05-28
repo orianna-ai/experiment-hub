@@ -383,11 +383,11 @@ export default function App() {
                     <h2 className="section-title">Data scope</h2>
                     <div className="stable">
                       <div className="stable-head"><div>Object</div><div>Access</div></div>
-                      <div className="stable-row"><div>Opportunity</div><div className="tags"><Tag color="green">Read</Tag><Tag color="blue">Write</Tag></div></div>
-                      <div className="stable-row"><div>Mutual Action Plan</div><div className="tags"><Tag color="green">Read</Tag><Tag color="blue">Write</Tag></div></div>
-                      <div className="stable-row"><div>Company</div><div className="tags"><Tag color="green">Read</Tag></div></div>
-                      <div className="stable-row"><div>Contact</div><div className="tags"><Tag color="green">Read</Tag></div></div>
-                      <div className="stable-row"><div>Task</div><div className="tags"><Tag color="green">Read</Tag><Tag color="blue">Write</Tag></div></div>
+                      <div className="stable-row"><div>Opportunity</div><div className="tags"><Tag color="gray">Read</Tag><Tag color="blue">Write</Tag></div></div>
+                      <div className="stable-row"><div>Mutual Action Plan</div><div className="tags"><Tag color="gray">Read</Tag><Tag color="blue">Write</Tag></div></div>
+                      <div className="stable-row"><div>Company</div><div className="tags"><Tag color="gray">Read</Tag></div></div>
+                      <div className="stable-row"><div>Contact</div><div className="tags"><Tag color="gray">Read</Tag></div></div>
+                      <div className="stable-row"><div>Task</div><div className="tags"><Tag color="gray">Read</Tag><Tag color="blue">Write</Tag></div></div>
                       <div className="stable-row">
                         <div><strong>External access via MCP</strong></div>
                         <div className="tags">
@@ -488,21 +488,21 @@ export default function App() {
                   <div className="diff-section">
                     <h3>Objects</h3>
                     <div className="stable diff-table">
-                      <div className="stable-row"><div>+ Added object MutualActionPlan</div><div><Tag color="green">Safe</Tag></div></div>
+                      <div className="stable-row"><div>+ Added object MutualActionPlan</div><div><Tag color="gray">Safe</Tag></div></div>
                     </div>
                   </div>
                   <div className="diff-section">
                     <h3>Fields</h3>
                     <div className="stable diff-table">
-                      <div className="stable-row"><div>+ Added field ProcurementStatus on Opportunity</div><div><Tag color="green">Safe</Tag></div></div>
+                      <div className="stable-row"><div>+ Added field ProcurementStatus on Opportunity</div><div><Tag color="gray">Safe</Tag></div></div>
                       <div className="stable-row"><div>+ Added field SecurityReview on Opportunity</div><div><Tag color="amber">Caution</Tag></div></div>
-                      <div className="stable-row"><div>+ Added field LegalReview on Opportunity</div><div><Tag color="green">Safe</Tag></div></div>
+                      <div className="stable-row"><div>+ Added field LegalReview on Opportunity</div><div><Tag color="gray">Safe</Tag></div></div>
                     </div>
                   </div>
                   <div className="diff-section">
                     <h3>Workflows</h3>
                     <div className="stable diff-table">
-                      <div className="stable-row"><div>+ Added workflow LegalReviewRouter (trigger: stage=Negotiation)</div><div><Tag color="green">Safe</Tag></div></div>
+                      <div className="stable-row"><div>+ Added workflow LegalReviewRouter (trigger: stage=Negotiation)</div><div><Tag color="gray">Safe</Tag></div></div>
                     </div>
                   </div>
                   <div className="diff-section">
