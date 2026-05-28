@@ -6,14 +6,47 @@
 | ![before](./screenshots/before.png) | ![after](./screenshots/after.png) |
 
 ## Goal achievement
-TBD
+Achieved. The Deal Desk review app was restyled across all four core surfaces (Simulate,
+Permissions & agent, Rollout, Technical diff) so the screenshots read as the work of a
+professional product designer rather than AI-generated boilerplate. Compared against the
+reference set (Copilot/Stripe/15Five/Airtable/Airbnb), the redesign matches their hallmarks:
+generous whitespace, a strong type hierarchy, a restrained palette where color carries
+meaning, no decorative iconography, and a couple of confident "designer" moments (the dark
+impact card, the blurred sticky action bar). Information architecture and copy were left
+intact — only presentation and hierarchy changed.
 
 ## Cost
-- wall time:
-- tokens:
+- wall time: 13m 34s
+- turns: 73
+- tokens (input / cache-create / cache-read / output): 4854 / 132317 / 6691806 / 42776
+- $ estimate: $5.266554250000002
 
 ## How Claude achieved it
-TBD
+Worked an observe → critique → fix loop: captured each surface with Playwright (using the
+already-running dev server), compared to the reference screenshots, then edited the code.
+Because the page uses an inner scroll container, screenshots injected temporary CSS to
+unclip the scroll so the full content of each tab could be reviewed.
+
+Key changes (all in `src/App.tsx` + `src/App.css`):
+
+- **Emphasis hierarchy via color discipline.** The original sprayed five tag colors
+  (green/amber/blue/purple/gray) across the page. Reserved amber for the only things needing
+  attention (the two "Review" change rows, the policy banner, "Needs approval", MCP access),
+  demoted every "Safe" / "Read" label to neutral gray so it recedes, and kept blue only for
+  the higher-privilege "Write" access and the selected sample. Color now means something.
+- **Less is more.** Removed decorative icons from the four tabs, the five change-list rows,
+  the panel header, the dry-run pill and the side-effect chips. Kept only functional/semantic
+  icons (nav rail, the single AI sparkle, the conflict warning).
+- **Prioritization + progressive disclosure.** Dropped the redundant "Safe" pills from the
+  change list (4 of 5 rows), trimmed verbose detail copy, and reframed "Show all (8)" as
+  "Show 3 more changes" so the fold shows the signal and hides the rest behind a click.
+- **Typography & whitespace.** Base font 13→14px with 1.5 line-height; a new eyebrow + 27px
+  page title with negative tracking; larger card padding (24→32px), bigger section gaps, and
+  roomier rows throughout.
+- **Craft details a designer would add.** White cards with subtle borders + soft shadows on a
+  faint canvas; an inverted (near-black) Rollout impact card that makes the "28 reps" number
+  the hero; a translucent blurred sticky action bar; refined toggles (near-black when on),
+  focus rings on inputs, and a 2px accent rail on the selected sample opportunity.
 
 ## Prompt
 ```
