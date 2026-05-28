@@ -1,0 +1,29 @@
+{
+  "source_pr_url": "https://github.com/coollabsio/coolify/pull/10362",
+  "source_repo": "coollabsio/coolify",
+  "source_pr_number": 10362,
+  "fixture_name": "coolify-10362-github-app-setup-flow",
+  "primary_surface": "Coolify GitHub App source setup page",
+  "surfaces": [
+    "Sources list with GitHub App source card and new source modal",
+    "Unconfigured GitHub App source setup page with manual and automated installation",
+    "GitHub App manifest registration page using generated one-time state",
+    "Authenticated manifest redirect callback status and error states",
+    "Post-manifest source page requiring repository installation",
+    "GitHub App repository install and re-install screens",
+    "Verified installation callback status and error states",
+    "Configured GitHub App source change view with permissions and resources"
+  ],
+  "mocked_dependencies": [
+    "Coolify authentication and current team",
+    "Laravel Livewire actions and route handling",
+    "GitHub manifest conversion API",
+    "GitHub installation verification API",
+    "Private keys, secrets, application resources, and callback cache"
+  ],
+  "verification": {
+    "build_command": "pnpm build",
+    "browser_entry": "/source/github/cm9x3h7nq0001i70z3d5z9zqp",
+    "pr_change_visible": "Click Register Now and the simulated GitHub form action shows a generated manifest state instead of the source UUID; callback screens show authenticated one-time state consumption and verified install/reinstall behavior."
+  }
+}

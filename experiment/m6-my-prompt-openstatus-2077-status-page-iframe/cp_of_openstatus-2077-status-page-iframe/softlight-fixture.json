@@ -1,0 +1,46 @@
+{
+  "source_pr_url": "https://github.com/openstatusHQ/openstatus/pull/2077",
+  "source_repo": "openstatusHQ/openstatus",
+  "source_pr_number": 2077,
+  "fixture_name": "openstatus-2077-status-page-iframe",
+  "primary_surface": "Public status page root in chromeless embed mode with title, banner, components, and feed visible by default",
+  "surfaces": [
+    "Chromeless embed status page layout",
+    "Embed section toggles for title, banner, components, and feed",
+    "Forced light and dark theme override while embed mode is active",
+    "Open status banner with internal links opening in a new tab",
+    "Component uptime trackers and grouped tracker accordion",
+    "Status feed with report and maintenance events",
+    "Empty feed state",
+    "Non-whitelabel powered-by footer attribution",
+    "Whitelabel embed footer hidden state",
+    "Standalone status page mode with header navigation and footer controls restored"
+  ],
+  "mocked_dependencies": [
+    "Status page backend data",
+    "tRPC queries and mutations",
+    "Next.js app routing and metadata",
+    "nuqs query parser runtime",
+    "next-themes provider",
+    "Authentication and subscription APIs",
+    "OpenStatus package UI primitives"
+  ],
+  "verification": {
+    "build": "pnpm build",
+    "runtime": "pnpm exec vite --host 127.0.0.1 --port 5173",
+    "browser": "Verified with local Google Chrome through playwright-core because the in-app browser backend was unavailable",
+    "evidence": [
+      "Default runtime URL resolves to http://127.0.0.1:5173/?embed=&theme=light",
+      "Embed shell has data-embed=true and the public header display is none",
+      "No fixture toolbar is visible in the default embed viewport",
+      "Title, banner, components, and feed sections are visible in the default embed state",
+      "Embed mode inserts robots noindex,nofollow metadata",
+      "Internal banner link has target=_blank in embed mode",
+      "Feed section toggle sets data-hide-feed=true and hides .section-feed",
+      "theme=dark applies the dark class only while embed mode is active",
+      "whiteLabel=1 removes the embed footer",
+      "Standalone whitelabel mode keeps footer controls but hides powered-by attribution",
+      "Standalone mode restores header display and footer controls"
+    ]
+  }
+}
